@@ -1,32 +1,5 @@
 @extends('layouts.dashboard')
 <?PHP
-use Illuminate\Support\Facades\Http;
-
-$res = Http::asForm()->withHeaders(
-    [
-        'Content-Type' => 'application/x-www-form-urlencoded',
-        'X-contract-id' => 'skh095g7',
-        'X-access-token' => '6c25420ffbb731a5b9a7a3da746d44f5'
-    ]
-)->post('https://webapi.smaregi.jp/access/', [
-    'proc_name' => 'product_ref',
-    'params' => json_encode([
-        'fields' => [ 'productId', 'categoryId', 'productCode', 'productName', 'price', 'cost', 'color' ],
-
-        'table_name' => 'Product'
-    ])
-]);
-
-$statusCode = $res->status();
-
-$rows = [];
-
-
-if ($statusCode == 200) {
-    $data = $res['result'];
-    $rows = $data;
-}
-
 $colors = \App\Models\Color::all();
 
 function getColorId($color) {
@@ -42,8 +15,21 @@ function getColorId($color) {
 ?>
 @section('content')
     <script>
+        function filterCodeColor() {
+            const productCode = document.getElementById('input-product-code').value;
+            const color = document.getElementById('input-color').value;
+
+            window.location.href = `/home?${color != '' ? 'color=' + color  : ''}${productCode != '' && color != '' ? '&' : ''}${productCode != '' ? 'product=' + productCode : ''}`
+        }
+
+        function filterByMarket() {
+            const market = document.getElementById('input-market').value;
+
+            window.location.href = `/home?${market != '' ? 'market=' +  market  : ''}`;
+        }
+    </script>
+    <script>
         function exportCSV(data) {
-            console.log(data);
             const rows = JSON.stringify(data);
             fetch('/api/data/export', {
                 method: 'POST',
@@ -63,7 +49,9 @@ function getColorId($color) {
                     a.remove();
                 })
         }
+
     </script>
+
             <div class="container-fuild pt-4 px-4">
                 <div class="bg-light rounded p-4">
                     <div class="row d-flex align-items-center justify-content-start mb-4">
@@ -72,15 +60,15 @@ function getColorId($color) {
                                 <h6 class="text-left">Search by market</h6>
                                 <label>Market</label>
                                 <div class="d-flex">
-                                    <select class="form-control">
-                                        <option>All</option>
-                                        <option>smaregi</option>
-                                        <option>sereposu</option>
-                                        <option>tokko</option>
-                                        <option>amazon</option>
-                                        <option>rakuten</option>
+                                    <select value="{{ $market }}" id="input-market" class="form-control">
+                                        <option value="">All</option>
+                                        <option {{ $market == 'smaregi' ? 'selected' : '' }} value="smaregi">smaregi</option>
+                                        <option {{ $market == 'sereposu' ? 'selected' : '' }} value="sereposu">sereposu</option>
+                                        <option {{ $market == 'tokko' ? 'selected' : '' }} value="tokko">tokko</option>
+                                        <option {{ $market == 'amazon' ? 'selected' : '' }} value="amazon">amazon</option>
+                                        <option {{ $market == 'rakuten' ? 'selected' : '' }} value="rakuten">rakuten</option>
                                     </select>
-                                    <button class="btn btn-secondary" style="margin-left: 8px;"><i class="fa fa-search"></i></button>
+                                    <button onclick="filterByMarket()" class="btn btn-secondary" style="margin-left: 8px;"><i class="fa fa-search"></i></button>
                                 </div>
 
                             </div>
@@ -88,19 +76,19 @@ function getColorId($color) {
                             <h6 class="mt-3 text-left">Search by code</h6>
                             <div class="d-flex align-items-end">
                                 <div>
-                                    <label>Code</label>
-                                    <input type="text" class="form-control"/>
+                                    <label>Product Code</label>
+                                    <input id="input-product-code" value="{{ $product }}" type="text" class="form-control"/>
                                 </div>
                                 <div style="margin-left: 8px;">
                                     <label>Color</label>
-                                    <select class="form-control" style="width: 210px">
+                                    <select id="input-color" class="form-control" style="width: 210px">
                                         <option value="">All</option>
-                                        @foreach($colors as $color)
-                                            <option value="{{ $color->id_color }}">{{ $color->color }}</option>
+                                        @foreach($colors as $c)
+                                            <option {{ $color == $c->color ? 'selected' : '' }} value="{{ $c->color }}">{{ $c->color }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <button class="btn btn-secondary" style="margin-left: 8px;"><i class="fa fa-search"></i></button>
+                                <button onclick="filterCodeColor()" class="btn btn-secondary" style="margin-left: 8px;"><i class="fa fa-search"></i></button>
                             </div>
 
                             </div>
@@ -132,7 +120,7 @@ function getColorId($color) {
                                 <tr class="text-dark">
                                     <th scope="col">id_product</th>
                                     <th scope="col">id_color</th>
-                                    <th scope="col">productNo</th>
+                                    <th scope="col">product Code</th>
                                     <th scope="col">color</th>
                                     <th scope="col">productNameENG</th>
                                     <th scope="col">productNameJP</th>
@@ -188,4 +176,5 @@ function getColorId($color) {
                     </div>
                 </div>
             </div>
+
 @endsection
