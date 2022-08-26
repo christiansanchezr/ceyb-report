@@ -1,10 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+use App\Models\Dproduct;
+use App\Models\Market;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Excel;
 
@@ -165,27 +164,91 @@ class DataController extends Controller {
     {
 
         $validationRules = [
-            'file' => 'required|file'
+            'file' => 'required|file',
+            'market' => 'required|exists:markets,id'
         ];
 
         $this->validate($request, $validationRules);
+/*
+        $response = Excel::import(new \App\Http\Imports\DproductsImport(), $request->file('file')->store('temp'));
+
+        return $response;*/
 
         $path = $request->file('file')->getRealPath();
         $records = array_map('str_getcsv', file($path));
+        $records = array_slice($records, 0, 1000);
 
         if (! count($records) > 0) {
             return 'Error...';
         }
 
-        // Get field names from header column
         $fields = array_map('strtolower', $records[0]);
 
-        // Remove the header column
         array_shift($records);
+
+        $years = collect($records[0])->filter(function ($year) {
+            return $year != "";
+        })->values()->all();
+        $records = array_slice($records, 7);
+
+        Dproduct::where('id_market', $request->market)->delete();
+        $yearsCount = count($years);
+        $currentYearCount = 1;
+        foreach ($records as $record) {
+
+            $values = array_slice($record, 18);
+
+            /*
+            $yearsData = [];
+
+            $sortValues = [];
+
+            foreach ($values as $key => $v) {
+                if ($key + 1 <= $currentYearCount * 12) {
+                    $sortValues[$currentYearCount - 1][] = $v;
+                } else {
+                    if ($currentYearCount < $yearsCount) {
+                        $currentYearCount++;
+                    }
+                }
+            }
+
+            foreach ($years as $i => $y) {
+                //$yearsData[] = [ $y => $sortValues[$i] ];
+            }
+            */
+
+            $dproduct = Dproduct::create([
+                'id_market' => $request->market,
+                'id_color' => $record[0],
+                'group_code' => $record[1],
+                'product_no' => $record[2],
+                'product_name' => $record[3],
+                'blf_code' => $record[4],
+                'blf_code_old' => $record[5],
+                'combined_code' => $record[6],
+                'item_number' => $record[7],
+                'for_sorting' => $record[8],
+                'product_code' => $record[9],
+                'serepos_product_code' => $record[10],
+                'smaregi_product_code' => $record[11],
+                'product_name_jp' => $record[12],
+                'selling_price' => $record[13],
+                'cost_price' => $record[14],
+                'product_code_special' => $record[15],
+                'product_name_special' => $record[16],
+                'years' => json_encode($years),
+                'values' => json_encode($values),
+
+            ]);
+        }
+
+
+        return redirect('home');
 
         foreach ($records as $record) {
             if (count($fields) != count($record)) {
-                return 'csv_upload_invalid_data';
+                //return 'csv_upload_invalid_data';
             }
 
             // Decode unwanted html entities
@@ -199,7 +262,6 @@ class DataController extends Controller {
         }
 
 
-        return redirect('home');
     }
 
     private function clear_encoding_str($value)
@@ -213,7 +275,6 @@ class DataController extends Controller {
         }
         return mb_convert_encoding($value, 'UTF-8', 'UTF-8');
     }
-
 }
 
 
