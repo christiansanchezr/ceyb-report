@@ -47,7 +47,9 @@
 
             <div class="navbar-nav w-100">
                 <a href="{{ route('home') }}" class="nav-item nav-link"><i class="fa fa-boxes-stacked me-2"></i>Inventory Control</a>
-                <a href="{{ route('users') }}" class="nav-item nav-link"><i class="fa fa-person me-2"></i>User Management</a>
+                @if(auth()->user()->hasRole('Admin'))
+                    <a href="{{ route('users') }}" class="nav-item nav-link"><i class="fa fa-person me-2"></i>User Management</a>
+                @endif
                 <a onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();" href="{{ route('logout') }}" class="nav-item nav-link"><i class="fa fa-arrow-right-from-bracket me-2"></i>Log out</a>
             </div>

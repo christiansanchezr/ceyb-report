@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Spatie\Permission\Models\Role;
 
 class UserCreateController extends Controller
 {
@@ -21,7 +22,8 @@ class UserCreateController extends Controller
         $validationRules = [
             'name' => 'required|string',
             'email' => 'required|unique:users',
-            'password' => 'required|confirmed'
+            'password' => 'required|confirmed',
+            'role' => 'required|exists:roles,id',
         ];
 
         $this->validate($request, $validationRules);
@@ -32,10 +34,15 @@ class UserCreateController extends Controller
         $user = User::create($data);
         $user->markEmailAsVerified();
 
+        $role = Role::find($request->role);
+
+        $user->assignRole([$role->name]);
+
         return redirect('users');
     }
 
     public function get() {
-        return view('users-create');
+        $roles = Role::all();
+        return view('users-create', ['roles' => $roles]);
     }
 }

@@ -25,6 +25,14 @@
                         <input type="password" class="form-control" id="password_confirmation" placeholder="Password" name="password_confirmation" required autocomplete="current-password">
                         <label for="floatingPassword">Confirm Password</label>
                     </div>
+                    <div class="form-floating mb-4">
+                        <select class="form-control" name="role" required id="role">
+                            @foreach($roles as $role)
+                                <option value="{{$role->id}}">{{ $role->name }}</option>
+                            @endforeach
+                        </select>
+                        <label for="floatingRole">Select a Role</label>
+                    </div>
                     <button type="submit" class="btn btn-primary py-3 w-100 mb-4">Create</button>
                     @if ($errors->any())
                         <div class="alert alert-danger">

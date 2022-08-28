@@ -109,30 +109,30 @@ $markets = \App\Models\Market::all();
 
                         </div>
                         <div class="col-md-6 d-flex justify-content-end align-items-end flex-column text-right">
-                            <h6 class="text-left">Upload Data</h6>
-                            <div>
-                                <form action="{{ route('data-import') }}" id="import-form" method="POST" enctype="multipart/form-data">
-                                    @csrf
-                                    <div>
-                                        <input required type="file" name="file" id="file" onchange="fileChange(event)" accept=".csv" class="form-control" style="position: absolute; opacity: 0; width: 0;" >
-                                        <button class="btn btn-secondary" onclick="document.getElementById('file').click();" id="csv-button">Select inventory File (CSV)</button>
-                                    </div>
-                                    <div class="mt-2">
-                                        <label>Select a Market</label>
-                                        <select value="{{ $market }}" required name="market" id="market" class="form-control" style="width: 188px;">
-                                            <option value="">Select a market</option>
-                                            @foreach($markets as $m)
-                                                <option value="{{ $m->id }}">{{ $m->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-primary d-block mt-2" disabled="true" id="csv-submit" type="submit">Import Data</button>
-                                </form>
-                            </div>
-
-
-
+                            @if(auth()->user()->hasRole('Typist') || auth()->user()->hasRole('Admin'))
+                                <h6 class="text-left">Upload Data</h6>
+                                <div>
+                                    <form action="{{ route('data-import') }}" id="import-form" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div>
+                                            <input required type="file" name="file" id="file" onchange="fileChange(event)" accept=".csv" class="form-control" style="position: absolute; opacity: 0; width: 0;" >
+                                            <button class="btn btn-secondary" onclick="document.getElementById('file').click();" id="csv-button">Select inventory File (CSV)</button>
+                                        </div>
+                                        <div class="mt-2">
+                                            <label>Select a Market</label>
+                                            <select value="{{ $market }}" required name="market" id="market" class="form-control" style="width: 188px;">
+                                                <option value="">Select a market</option>
+                                                @foreach($markets as $m)
+                                                    <option value="{{ $m->id }}">{{ $m->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary d-block mt-2" disabled="true" id="csv-submit" type="submit">Import Data</button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
+
 
                     </div>
                 </div>

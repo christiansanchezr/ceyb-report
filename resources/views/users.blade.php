@@ -36,6 +36,7 @@
                         <th scope="col">ID</th>
                         <th scope="col">Name</th>
                         <th scope="col">Email</th>
+                        <th scope="col">Role</th>
                         <th scope="col">Registration Date</th>
                     </tr>
                     </thead>
@@ -45,6 +46,7 @@
                             <td>{{ $user->id }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>{{ $user->getRoleNames()->first() }}</td>
                             <td>{{ $user->created_at }}</td>
                         </tr>
                     @endforeach
